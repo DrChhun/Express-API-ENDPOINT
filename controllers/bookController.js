@@ -1,3 +1,5 @@
+import { body, validationResult } from "express-validator";
+
 let library = [
     {
         id: 1,
@@ -14,6 +16,14 @@ let library = [
         genre: "Software Development",
     }
 ];
+
+const validate = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+};
 
 export const getAllBooks = (req, res, next) => {
     try {
@@ -33,7 +43,7 @@ export const getBookById = (req, res, next) => {
     try {
         const book = library.find(b => b.id === bookId);
 
-        { !book && res.status(404).send('Book not found') }
+        { !book && res.status(404).json({message: 'Book not found', status: 404, time: new Date()}) }
 
         res.status(200).json({
             message: `Successfully get book with id : ${bookId}`,
@@ -47,8 +57,12 @@ export const getBookById = (req, res, next) => {
 };
 
 export const addBook = (req, res, next) => {
-    const { title, author, year, genre } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
 
+    const { title, author, year, genre } = req.body;
     try {
         const newBook = { id: library.length + 1, title, author, year, genre };
         library.push(newBook);
@@ -64,6 +78,11 @@ export const addBook = (req, res, next) => {
 };
 
 export const updateBookById = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const bookId = req.params.id;
     const { title, author, year, genre } = req.body;
 
@@ -71,7 +90,11 @@ export const updateBookById = (req, res, next) => {
         const bookIndex = library.findIndex(b => b.id === parseInt(bookId));
 
         if (bookIndex === -1) {
-            return res.status(404).send('Book not found');
+            return res.status(404).json({
+                message: 'Book not found',
+                status: 404,
+                time: new Date()
+            });
         }
 
         const updatedBook = { id: parseInt(bookId), title, author, year, genre };
@@ -92,7 +115,7 @@ export const deleteBookById = (req, res, next) => {
     const bookId = +req.params.id;
 
     try {
-        { !library.find(x => x.id === bookId) && res.status(404).json({ messgae: 'Book not found' }) }
+        { !library.find(x => x.id === bookId) && res.status(404).json({ messgae: 'Book not found', status: 404, time: new Date() }) }
 
         library = library.filter(x => x.id !== bookId)
 

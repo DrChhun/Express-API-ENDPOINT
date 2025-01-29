@@ -1,5 +1,6 @@
 import express from 'express';
 import { getAllBooks, getBookById, addBook, updateBookById, deleteBookById } from '../controllers/bookController.js';
+import { createBookValidator } from "../validators/bookValidator.js"
 
 const router = express.Router();
 
@@ -110,7 +111,7 @@ router.get('/:id', getBookById);
  *                 genre:
  *                   type: string
  */
-router.post('/', addBook);
+router.post('/', createBookValidator, addBook);
 
 /**
  * @swagger
@@ -160,7 +161,7 @@ router.post('/', addBook);
  *       404:
  *         description: Book not found
  */
-router.put('/:id', updateBookById);
+router.put('/:id', createBookValidator, updateBookById);
 
 /**
  * @swagger
